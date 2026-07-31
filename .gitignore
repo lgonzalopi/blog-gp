@@ -1,0 +1,16 @@
+# Configuración local de Claude Code (personal, no compartir)
+.claude/settings.local.json
+
+# Next.js (cuando migremos el proyecto)
+node_modules/
+.next/
+out/
+
+# Variables de entorno (claves de Supabase, API keys, etc.)
+.env
+.env.local
+.env*.local
+
+# Sistema
+.DS_Store
+Thumbs.db
