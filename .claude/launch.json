@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "blog-gp",
+      "runtimeExecutable": "C:\\Windows\\System32\\cmd.exe",
+      "runtimeArgs": ["/d", "/c", "set PATH=C:\\Program Files\\nodejs;%PATH%&& npm run dev"],
+      "port": 3000
+    }
+  ]
+}

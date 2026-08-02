@@ -1,0 +1,49 @@
+/* ─────────────────────────────────────────────
+   Paleta por tema. Los componentes nunca usan
+   estos hex directamente: leen las variables vía
+   el objeto C de components/notas-ui.js.
+   ───────────────────────────────────────────── */
+
+:root,
+:root[data-tema="oscuro"] {
+  --bg: #0b0c0e;
+  --raised: #131417;
+  --title: #f3f4f0;
+  --body: #c7c9c2;
+  --muted: #7c7e76;
+  --green: #3ece8a;
+  --green-text: #0b0c0e; /* texto sobre fondo verde */
+  --line: #24261f;
+  --error: #e0796a;
+  --warn: #d9a441;
+  color-scheme: dark;
+}
+
+:root[data-tema="claro"] {
+  --bg: #fafaf8;
+  --raised: #ffffff;
+  --title: #16181a;
+  --body: #3a3d3f;
+  --muted: #6b6e70;
+  --green: #0f7a4f; /* verde oscurecido: sobre fondo claro el original no contrasta */
+  --green-text: #ffffff;
+  --line: #e3e3dd;
+  --error: #b23b2e;
+  --warn: #8a6410;
+  color-scheme: light;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+* {
+  box-sizing: border-box;
+}
