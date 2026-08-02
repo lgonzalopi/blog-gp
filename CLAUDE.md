@@ -135,9 +135,24 @@ Siempre debe existir un botón de **Deshacer** que devuelva el texto original.
       `.env.local` (ver `.env.local.example`). Si faltan las variables, el
       sitio cae solo a un modo de demostración con notas de ejemplo y
       guardado de sesión, sin romperse.
-- [ ] Despliegue en Vercel + dominio propio. Al hacerlo, completar
-      `NEXT_PUBLIC_SITE_URL` para que los links de Open Graph apunten al
-      dominio real.
+- [x] Desplegado en Vercel: https://blog-gp-theta.vercel.app
+      Cada push a `main` reconstruye y publica solo. `NEXT_PUBLIC_SITE_URL`
+      no está cargada a propósito: el layout toma la dirección que Vercel
+      expone. Al conectar el dominio propio, cargarla con protocolo.
+- [ ] Dominio propio
+
+## Tropiezos del despliegue — por si hay que repetirlo
+
+- **Todo daba 404 aunque el build decía Ready.** El proyecto de Vercel se
+  creó cuando el repo todavía no tenía el código Next.js, así que quedó con
+  *Application Preset: Other* y no ejecutaba `next build`. Al reimportar hay
+  que verificar que diga **Next.js**; Vercel recuerda la configuración vieja
+  del repo, incluidas las variables de entorno.
+- **El sitio pedía login de Vercel.** Es *Deployment Protection*, activada
+  por defecto. Se apaga en Settings y vuelve a activarse si se recrea el
+  proyecto. Ojo: la respuesta queda cacheada un rato después de apagarla.
+- El dominio de producción es `blog-gp-theta`; `blog-gp-lgpi` es un alias y
+  `blog-gp-seven` quedó del proyecto anterior, ya borrado.
 
 ## Cómo trabajar conmigo en este proyecto
 
