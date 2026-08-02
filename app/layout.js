@@ -1,7 +1,30 @@
 import "./globals.css";
 import { TITULO_SITIO, DESCRIPCION_SITIO } from "@/components/notas-ui";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+// Una URL mal escrita en la variable de entorno no debe tumbar el build
+// entero: se le agrega el protocolo si falta y, si aun así no es válida, se
+// cae al valor por defecto. Vercel expone VERCEL_URL sin protocolo, así que
+// sirve de respaldo automático antes de configurar el dominio propio.
+function resolverSiteUrl() {
+  const candidatos = [
+    process.env.NEXT_PUBLIC_SITE_URL,
+    process.env.VERCEL_PROJECT_PRODUCTION_URL,
+    process.env.VERCEL_URL,
+  ];
+  for (const bruto of candidatos) {
+    const v = (bruto || "").trim();
+    if (!v) continue;
+    const conProtocolo = /^https?:\/\//i.test(v) ? v : `https://${v}`;
+    try {
+      return new URL(conProtocolo).origin;
+    } catch {
+      // valor inservible: se prueba el siguiente
+    }
+  }
+  return "http://localhost:3000";
+}
+
+const SITE_URL = resolverSiteUrl();
 
 export const viewport = {
   width: "device-width",
