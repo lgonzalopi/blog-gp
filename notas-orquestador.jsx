@@ -2,9 +2,17 @@ import { useState, useEffect, useRef } from 'react';
 import { X, Loader2, Lock, Unlock, ArrowLeft, Sparkles, SpellCheck, Undo2, AlertCircle, Copy, Download, Upload } from 'lucide-react';
 
 /* ─────────────────────────────────────────────
-   CONFIGURACIÓN — cambia esto por tu propia clave
+   ARCHIVO DE REFERENCIA — no lo usa el sitio.
+
+   Es el componente original del artefacto de Claude.ai, que se conserva
+   solo como registro del diseño de partida. El sitio corre sobre
+   components/NotasOrquestador.jsx.
+
+   La clave de autor vivía acá en texto plano. Ya no: se verifica en el
+   servidor (app/api/auth) contra la variable de entorno AUTHOR_PASSWORD,
+   que nunca llega al navegador ni al repositorio.
    ───────────────────────────────────────────── */
-const CLAVE_AUTOR = 'gonzalo2026';
+const CLAVE_AUTOR = '';
 const AUTOR = 'Gonzalo';
 const TITULO_SITIO = 'Notas de un orquestador';
 const DESCRIPCION_SITIO =
