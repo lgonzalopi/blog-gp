@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { X, Loader2, Lock, Unlock, ArrowLeft, Sparkles, SpellCheck, Undo2, AlertCircle, Copy, Download, Upload, Mic, MicOff } from 'lucide-react';
-import { AUTOR, TITULO_SITIO, DESCRIPCION_SITIO, TEMAS_SITIO, C, alfa, RichText, Keywords, resumen, fecha, fechaInput, lectura, btn, contenedor, estiloPagina, ESTILOS_BASE, Footer } from './notas-ui';
+import { AUTOR, TITULO_SITIO, TEMAS_SITIO, C, alfa, RichText, Keywords, resumen, fecha, fechaInput, lectura, btn, contenedor, estiloPagina, ESTILOS_BASE, Footer } from './notas-ui';
 import BotonTema from './BotonTema';
 
 /* ── formato de respaldo: texto plano, legible y reimportable ── */
@@ -363,8 +363,7 @@ export default function NotasOrquestador() {
                 </div>
               </div>
               <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 'clamp(28px, 8vw, 38px)', lineHeight: 1.12, color: C.title, margin: '0 0 16px' }}>{TITULO_SITIO}</h1>
-              <p style={{ fontSize: 'clamp(15px, 4vw, 16px)', lineHeight: 1.65, color: C.body, margin: '0 0 14px', maxWidth: '52ch' }}>{DESCRIPCION_SITIO}</p>
-              <p style={{ fontSize: 'clamp(12px, 3.2vw, 13px)', lineHeight: 1.7, color: C.muted, margin: 0, maxWidth: '58ch' }}>{TEMAS_SITIO}</p>
+              <p style={{ fontSize: 'clamp(13px, 3.4vw, 14px)', lineHeight: 1.7, color: C.muted, margin: 0, maxWidth: '58ch' }}>{TEMAS_SITIO}</p>
             </header>
 
             {esAutor && hayStorage === false && (

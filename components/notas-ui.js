@@ -1,9 +1,6 @@
-export const AUTOR = 'Gonzalo Pérez';
-export const TITULO_SITIO = 'Notas del Orquestador';
-export const DESCRIPCION_SITIO =
-  'Lo que voy aprendiendo, mientras lo entiendo, lo que voy desarrollando y rompiendo, lo que voy sintiendo y anteponiendo.';
-export const TEMAS_SITIO =
-  'Tecnología, AI, frameworks, Growth, Startups, Marketing, Data analytics, first principles, systems thinking, crecimiento, conocimiento, autoconocimiento, salud y ejercicio y más.';
+/* Los textos del sitio viven en lib/sitio.mjs (ver el porqué ahí) y se
+   reexportan acá para no cambiar los imports del resto del sitio. */
+export { AUTOR, TITULO_SITIO, TEMAS_SITIO } from '@/lib/sitio.mjs';
 
 /* Los colores apuntan a variables CSS definidas en app/globals.css, una vez
    por tema. Cambiar de tema es cambiar data-tema en <html>: nada acá se
@@ -138,7 +135,7 @@ export const Footer = () => (
   >
     <span>
       <span style={{ color: C.muted }}>Developed by </span>
-      <span style={{ color: C.green }}>GP ai powered</span>
+      <span style={{ color: C.green }}>GP AI powered</span>
     </span>
   </footer>
 );

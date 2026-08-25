@@ -1,5 +1,5 @@
 import "./globals.css";
-import { TITULO_SITIO, DESCRIPCION_SITIO } from "@/components/notas-ui";
+import { TITULO_SITIO, TEMAS_SITIO } from "@/components/notas-ui";
 
 // Una URL mal escrita en la variable de entorno no debe tumbar el build
 // entero: se le agrega el protocolo si falta y, si aun así no es válida, se
@@ -58,10 +58,10 @@ export const metadata = {
     default: TITULO_SITIO,
     template: `%s — ${TITULO_SITIO}`,
   },
-  description: DESCRIPCION_SITIO,
+  description: TEMAS_SITIO,
   openGraph: {
     title: TITULO_SITIO,
-    description: DESCRIPCION_SITIO,
+    description: TEMAS_SITIO,
     siteName: TITULO_SITIO,
     type: "website",
     locale: "es_ES",
@@ -69,7 +69,7 @@ export const metadata = {
   twitter: {
     card: "summary",
     title: TITULO_SITIO,
-    description: DESCRIPCION_SITIO,
+    description: TEMAS_SITIO,
   },
 };
 

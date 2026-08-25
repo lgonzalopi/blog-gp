@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "ideas": "node --env-file=.env.local agente/ideas.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.111.0",
@@ -16,6 +17,7 @@
     "react-dom": "19.2.4"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "^0.116.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.12"
   }

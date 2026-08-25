@@ -13,9 +13,11 @@ confiable.
 
 ## Textos del sitio — fuente única
 
-Viven en `components/notas-ui.js` (`AUTOR`, `TITULO_SITIO`,
-`DESCRIPCION_SITIO`, `TEMAS_SITIO`). Portada, páginas de nota y metadatos
-Open Graph los leen de ahí — cambiar solo ese archivo, nunca duplicarlos.
+Viven en `lib/sitio.mjs` (`AUTOR`, `TITULO_SITIO`, `DESCRIPCION_SITIO`,
+`TEMAS_SITIO`). `components/notas-ui.js` los reexporta, así que el resto del
+sitio los sigue importando de ahí. Están en un archivo aparte porque
+`notas-ui.js` tiene JSX y el agente de ideas corre en Node puro, que no puede
+importarlo. Cambiar solo `lib/sitio.mjs`, nunca duplicarlos.
 
 ## Estado actual
 
@@ -103,6 +105,47 @@ se queda como él lo escribió.
 
 Siempre debe existir un botón de **Deshacer** que devuelva el texto original.
 
+## El agente de ideas — `agente/ideas.mjs`
+
+**Cómo se usa está en `agente/README.md`** (objetivo, comandos, qué devuelve,
+qué tocar para cambiarlo, costo). Acá van solo las decisiones de diseño y sus
+porqués — no duplicar el manual, que envejecen distinto.
+
+Un programa aparte del sitio, que se corre a mano:
+
+```
+npm run ideas                 # 8 ideas
+npm run ideas -- 12           # 12 ideas
+npm run ideas -- --foco="agentes de IA en growth"
+```
+
+Qué hace: lee de Supabase todas las notas publicadas (título, fecha, palabras
+clave y las primeras líneas), busca en la web qué se está discutiendo hoy en
+los temas del blog, cruza las dos cosas y propone ideas con ángulo. Deja un
+archivo en `ideas/ideas-<fecha>.md` y lo imprime en la terminal.
+
+Cada idea trae tesis (no tema), por qué es oportuna ahora con sus fuentes, el
+gancho de apertura, palabras clave, con qué nota ya publicada conversa y largo
+estimado.
+
+Decisiones que conviene conocer antes de tocarlo:
+
+- **No usa el tool runner del SDK, sino un loop propio.** El buscador web con
+  filtrado dinámico (`web_search_20260209`) ejecuta código en un contenedor
+  del servidor, y la API exige que se le devuelva el id de ese contenedor en
+  cada llamada siguiente. El runner no lo arrastra y la conversación se corta
+  con un 400 (`container_id is required...`). El loop lo mantiene a mano.
+- **El entregable sale por una herramienta (`entregar_ideas`), no por texto
+  libre.** Así el resultado siempre viene con la misma estructura, sin pedirle
+  JSON al modelo — y sin chocar con las citas que agrega la búsqueda web.
+- **No inventa el "por qué ahora".** Si afirma que algo está pasando, tiene
+  que venir de una búsqueda y llevar su URL. Está en el prompt del sistema.
+- Modelo y esfuerzo se cambian con `AGENTE_MODELO` y `AGENTE_ESFUERZO`
+  (`low`…`max`). Por defecto `claude-opus-5` con esfuerzo `high`. Una corrida
+  de 2 ideas costó ~100k tokens de entrada y ~7k de salida.
+- Solo corre en local: `npm run ideas` lee `.env.local` con `--env-file`. No
+  toca el sitio desplegado ni escribe en la base — solo lee.
+
 ## Bugs ya resueltos — no reintroducir
 
 1. **No pedir JSON a la API.** Los saltos de línea del texto rompen
@@ -139,6 +182,8 @@ Siempre debe existir un botón de **Deshacer** que devuelva el texto original.
       Cada push a `main` reconstruye y publica solo. `NEXT_PUBLIC_SITE_URL`
       no está cargada a propósito: el layout toma la dirección que Vercel
       expone. Al conectar el dominio propio, cargarla con protocolo.
+- [x] Agente de ideas de notas (`agente/ideas.mjs`, `npm run ideas`): lee lo
+      ya publicado, busca en la web y propone ideas con ángulo y fuentes
 - [ ] Dominio propio
 
 ## Tropiezos del despliegue — por si hay que repetirlo
