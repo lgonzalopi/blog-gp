@@ -13,10 +13,17 @@ export async function PATCH(request, ctx) {
   }
 
   const { id } = await ctx.params;
-  const { titulo, keywords, ts } = await request.json();
+  const { titulo, text, keywords, ts } = await request.json();
 
   const cambios = {};
   if (typeof titulo === 'string' && titulo.trim()) cambios.titulo = titulo.trim();
+  if (typeof text === 'string') {
+    // Vaciar el cuerpo dejaría una nota publicada sin contenido: se rechaza.
+    if (!text.trim()) {
+      return NextResponse.json({ error: 'El cuerpo no puede quedar vacío.' }, { status: 400 });
+    }
+    cambios.cuerpo = text.trim();
+  }
   if (keywords !== undefined) {
     cambios.keywords = Array.isArray(keywords)
       ? limpiarKeywords(keywords.join(','))

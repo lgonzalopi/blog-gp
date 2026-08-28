@@ -104,12 +104,14 @@ export const btn = (v) => {
 export const contenedor = {
   maxWidth: '680px',
   margin: '0 auto',
-  padding: 'clamp(32px, 8vw, 56px) clamp(18px, 5vw, 24px) clamp(64px, 12vw, 96px)',
+  padding: 'clamp(28px, 6vw, 44px) clamp(18px, 5vw, 24px) clamp(64px, 12vw, 96px)',
 };
 
 export const estiloPagina = {
   background: C.bg,
-  minHeight: '100vh',
+  // Descuenta la barra fija: con 100vh la página siempre desbordaría por
+  // el alto del encabezado y aparecería scroll aunque no haya contenido.
+  minHeight: 'calc(100vh - 52px)',
   fontFamily: "'IBM Plex Sans', sans-serif",
   color: C.body,
 };

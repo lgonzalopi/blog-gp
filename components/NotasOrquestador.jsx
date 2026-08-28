@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { X, Loader2, Lock, Unlock, ArrowLeft, Sparkles, SpellCheck, Undo2, AlertCircle, Copy, Download, Upload, Mic, MicOff } from 'lucide-react';
-import { AUTOR, TITULO_SITIO, TEMAS_SITIO, C, alfa, RichText, Keywords, resumen, fecha, fechaInput, lectura, btn, contenedor, estiloPagina, ESTILOS_BASE, Footer } from './notas-ui';
-import BotonTema from './BotonTema';
+import { X, Loader2, ArrowLeft, Sparkles, SpellCheck, Undo2, AlertCircle, Copy, Download, Upload, Mic, MicOff, Pencil } from 'lucide-react';
+import { TITULO_SITIO, TEMAS_SITIO, C, alfa, RichText, Keywords, resumen, fecha, fechaInput, lectura, btn, contenedor, estiloPagina, ESTILOS_BASE, Footer } from './notas-ui';
+import { useAutor } from './AutorContext';
 
 /* ── formato de respaldo: texto plano, legible y reimportable ── */
 const SEP = '\n\n=====NOTA=====\n';
@@ -75,16 +75,16 @@ export default function NotasOrquestador() {
   const [hayStorage, setHayStorage] = useState(null); // null=probando, true/false
   const [pagina, setPagina] = useState(0);
 
-  const [esAutor, setEsAutor] = useState(false);
-  const [pidiendoClave, setPidiendoClave] = useState(false);
-  const [claveInput, setClaveInput] = useState('');
-  const [claveError, setClaveError] = useState(false);
+  // La sesión vive en el contexto (lo comparte con el encabezado) para que
+  // no se pierda al abrir una nota y volver.
+  const { esAutor } = useAutor();
 
   const [cargando, setCargando] = useState(null);
   const [titulo, setTitulo] = useState('');
   const [cuerpo, setCuerpo] = useState('');
   const [keywords, setKeywords] = useState('');
   const [fechaPub, setFechaPub] = useState('');
+  const [editandoId, setEditandoId] = useState(null); // null = nota nueva
   const [previo, setPrevio] = useState(null);
   const [vistaPrevia, setVistaPrevia] = useState(false);
   const [notice, setNotice] = useState(null);
@@ -187,7 +187,62 @@ export default function NotasOrquestador() {
     return new Date(a, m - 1, d, ahora.getHours(), ahora.getMinutes(), ahora.getSeconds()).toISOString();
   };
 
+  const limpiarEditor = () => {
+    setTitulo(''); setCuerpo(''); setKeywords(''); setFechaPub(fechaInput());
+    setPrevio(null); setVistaPrevia(false); setEditandoId(null);
+  };
+
+  // Carga una nota publicada en el editor. El id guardado en editandoId es
+  // lo que hace que "Publicar" pase a ser "Guardar cambios".
+  const editarNota = (n) => {
+    setEditandoId(n.id);
+    setTitulo(n.titulo === 'Sin título' ? '' : n.titulo);
+    setCuerpo(n.text);
+    setKeywords((n.keywords || []).join(', '));
+    setFechaPub(fechaInput(new Date(n.ts)));
+    setPrevio(null); setVistaPrevia(false); setNotice(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cancelarEdicion = () => { limpiarEditor(); setNotice(null); };
+
+  const guardarCambios = async () => {
+    const t = cuerpo.trim();
+    if (!t) return;
+    const listaKeywords = keywords.split(',').map((k) => k.trim()).filter(Boolean);
+    const cuerpoActualizado = {
+      titulo: titulo.trim() || 'Sin título',
+      text: t,
+      keywords: listaKeywords,
+      ts: tsElegido(),
+    };
+
+    if (hayStorage) {
+      try {
+        const res = await fetch(`/api/notes/${editandoId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(cuerpoActualizado),
+        });
+        if (!res.ok) throw new Error((await res.json()).error || 'no se pudo guardar');
+        const { nota } = await res.json();
+        setNotas((prev) => prev.map((n) => (n.id === nota.id ? nota : n))
+          .sort((a, b) => new Date(b.ts) - new Date(a.ts)));
+      } catch (e) {
+        setNotice({ type: 'error', text: 'No se pudieron guardar los cambios. Tu texto sigue acá.', detalle: (e && e.message) || String(e) });
+        return;
+      }
+    } else {
+      setNotas((prev) => prev.map((n) => (n.id === editandoId
+        ? { ...n, titulo: cuerpoActualizado.titulo, text: t, keywords: listaKeywords, ts: cuerpoActualizado.ts || n.ts }
+        : n)).sort((a, b) => new Date(b.ts) - new Date(a.ts)));
+    }
+    limpiarEditor();
+    setNotice({ type: 'ok', text: 'Cambios guardados.' });
+  };
+
   const publicar = async () => {
+    if (editandoId) return guardarCambios();
     const t = cuerpo.trim();
     if (!t) return;
     const listaKeywords = keywords.split(',').map((k) => k.trim()).filter(Boolean);
@@ -215,8 +270,8 @@ export default function NotasOrquestador() {
       setNotas((prev) => [nueva, ...prev].sort((a, b) => new Date(b.ts) - new Date(a.ts)));
       setNotice({ type: 'warn', text: 'Publicado solo en esta sesión (Supabase no está conectado todavía). Usa Respaldar antes de cerrar — si no, se pierde.' });
     }
-    setTitulo(''); setCuerpo(''); setKeywords(''); setFechaPub(fechaInput());
-    setPrevio(null); setVistaPrevia(false); setPagina(0);
+    limpiarEditor();
+    setPagina(0);
   };
 
   const procesar = async (modo) => {
@@ -299,25 +354,6 @@ export default function NotasOrquestador() {
     setImportText(''); setPanelRespaldo(null); setPagina(0);
   };
 
-  const intentarClave = async () => {
-    try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ clave: claveInput }),
-      });
-      if (!res.ok) { setClaveError(true); return; }
-      setEsAutor(true); setPidiendoClave(false); setClaveInput(''); setClaveError(false);
-    } catch (e) {
-      setClaveError(true);
-    }
-  };
-
-  const salirModoAutor = async () => {
-    setEsAutor(false);
-    try { await fetch('/api/auth/logout', { method: 'POST' }); } catch (e) { /* no crítico */ }
-  };
-
   const colorNotice = notice ? (notice.type === 'error' ? C.error : notice.type === 'warn' ? C.warn : C.green) : C.muted;
 
   const POR_PAGINA = 5;
@@ -343,28 +379,12 @@ export default function NotasOrquestador() {
       `}</style>
 
       <div style={contenedor}>
-            <header style={{ marginBottom: 'clamp(32px, 8vw, 44px)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', marginBottom: '18px' }}>
-                <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', letterSpacing: '.15em', textTransform: 'uppercase', color: C.green }}>{AUTOR}</span>
-                <div style={{ display: 'flex', alignItems: 'center', marginRight: '-8px', flexShrink: 0 }}>
-                  <BotonTema />
-                  <button
-                    onClick={() => (esAutor ? salirModoAutor() : setPidiendoClave(!pidiendoClave))}
-                    aria-label={esAutor ? 'Salir del modo autor' : 'Entrar en modo autor'}
-                    style={{
-                      background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-                      color: esAutor ? C.green : C.muted, opacity: esAutor ? 1 : .4,
-                      display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                      width: '40px', height: '40px', flexShrink: 0,
-                    }}
-                  >
-                    {esAutor ? <Unlock size={14} /> : <Lock size={14} />}
-                  </button>
-                </div>
-              </div>
+            {/* El nombre, el tema y el candado viven ahora en la barra fija
+                (components/Encabezado.jsx). Acá queda solo la portada. */}
+            <div style={{ marginBottom: 'clamp(32px, 8vw, 44px)' }}>
               <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 'clamp(28px, 8vw, 38px)', lineHeight: 1.12, color: C.title, margin: '0 0 16px' }}>{TITULO_SITIO}</h1>
               <p style={{ fontSize: 'clamp(13px, 3.4vw, 14px)', lineHeight: 1.7, color: C.muted, margin: 0, maxWidth: '58ch' }}>{TEMAS_SITIO}</p>
-            </header>
+            </div>
 
             {esAutor && hayStorage === false && (
               <div style={{ border: `1px solid ${alfa(C.warn, 20)}`, background: alfa(C.warn, 5), borderRadius: '6px', padding: '12px 14px', marginBottom: '28px', display: 'flex', gap: '10px' }}>
@@ -375,20 +395,22 @@ export default function NotasOrquestador() {
               </div>
             )}
 
-            {pidiendoClave && !esAutor && (
-              <div className="fade" style={{ display: 'flex', gap: '8px', marginBottom: '32px' }}>
-                <input
-                  type="password" value={claveInput} autoFocus placeholder="Clave de autor"
-                  onChange={(e) => { setClaveInput(e.target.value); setClaveError(false); }}
-                  onKeyDown={(e) => e.key === 'Enter' && intentarClave()}
-                  style={{ flex: 1, background: C.raised, border: `1px solid ${claveError ? C.error : C.line}`, borderRadius: '3px', padding: '9px 12px', color: C.title, fontFamily: "'IBM Plex Mono', monospace", fontSize: '13px', outline: 'none' }}
-                />
-                <button onClick={intentarClave} style={btn('primary')}>Entrar</button>
-              </div>
-            )}
-
             {esAutor && (
               <div className="fade" style={{ background: C.raised, border: `1px solid ${C.line}`, borderRadius: '8px', padding: '20px', marginBottom: '52px' }}>
+                {editandoId && (
+                  <div style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px',
+                    flexWrap: 'wrap', marginBottom: '14px', paddingBottom: '12px',
+                    borderBottom: `1px solid ${C.line}`,
+                  }}>
+                    <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', color: C.green }}>
+                      Editando una nota publicada
+                    </span>
+                    <button onClick={cancelarEdicion} style={btn('ghost')}>
+                      <X size={13} /> Cancelar
+                    </button>
+                  </div>
+                )}
                 <input
                   value={titulo} onChange={(e) => setTitulo(e.target.value)}
                   placeholder="Título (opcional — se sugiere al procesar)"
@@ -464,7 +486,9 @@ export default function NotasOrquestador() {
                         {previo && <button onClick={deshacer} style={btn('ghost')}><Undo2 size={13} /> Deshacer</button>}
                         <button onClick={() => procesar('pulir')} style={btn('ghost')}><SpellCheck size={13} /> Pulir</button>
                         <button onClick={() => procesar('refinar')} style={btn('ghost')}><Sparkles size={13} /> Refinar</button>
-                        <button onClick={publicar} style={btn('primary')}>Publicar</button>
+                        <button onClick={publicar} style={btn('primary')}>
+                          {editandoId ? 'Guardar cambios' : 'Publicar'}
+                        </button>
                       </>
                     )}
                   </div>
@@ -551,14 +575,24 @@ export default function NotasOrquestador() {
                           {fecha(n.ts)} · {lectura(n.text)} min
                         </span>
                         {esAutor && (
-                          <button onClick={(ev) => { ev.preventDefault(); ev.stopPropagation(); eliminar(n.id); }} aria-label="Eliminar nota"
-                            style={{
-                              background: 'none', border: 'none', cursor: 'pointer', color: C.muted, opacity: .5,
-                              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                              width: '32px', height: '32px', margin: '-8px -8px -8px 0', flexShrink: 0,
-                            }}>
-                            <X size={13} />
-                          </button>
+                          <span style={{ display: 'inline-flex', gap: '2px', margin: '-8px -8px -8px 0', flexShrink: 0 }}>
+                            <button onClick={(ev) => { ev.preventDefault(); ev.stopPropagation(); editarNota(n); }} aria-label={`Editar: ${n.titulo}`}
+                              style={{
+                                background: 'none', border: 'none', cursor: 'pointer', color: C.muted, opacity: .65,
+                                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                                width: '32px', height: '32px',
+                              }}>
+                              <Pencil size={13} />
+                            </button>
+                            <button onClick={(ev) => { ev.preventDefault(); ev.stopPropagation(); eliminar(n.id); }} aria-label={`Eliminar: ${n.titulo}`}
+                              style={{
+                                background: 'none', border: 'none', cursor: 'pointer', color: C.muted, opacity: .5,
+                                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                                width: '32px', height: '32px',
+                              }}>
+                              <X size={13} />
+                            </button>
+                          </span>
                         )}
                       </div>
                       <h2 className="card-title" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 'clamp(19px, 5vw, 22px)', lineHeight: 1.25, color: C.title, margin: '0 0 10px' }}>

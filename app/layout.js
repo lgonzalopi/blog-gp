@@ -1,5 +1,7 @@
 import "./globals.css";
 import { TITULO_SITIO, TEMAS_SITIO } from "@/components/notas-ui";
+import { AutorProvider } from "@/components/AutorContext";
+import Encabezado from "@/components/Encabezado";
 
 // Una URL mal escrita en la variable de entorno no debe tumbar el build
 // entero: se le agrega el protocolo si falta y, si aun así no es válida, se
@@ -79,7 +81,14 @@ export default function RootLayout({ children }) {
       <head>
         <script dangerouslySetInnerHTML={{ __html: APLICAR_TEMA }} />
       </head>
-      <body>{children}</body>
+      <body>
+        {/* El proveedor va acá y no dentro de cada página para que la sesión
+            del autor sobreviva al navegar entre la portada y las notas. */}
+        <AutorProvider>
+          <Encabezado />
+          {children}
+        </AutorProvider>
+      </body>
     </html>
   );
 }

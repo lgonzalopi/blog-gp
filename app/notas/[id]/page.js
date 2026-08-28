@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { supabaseAdmin } from '@/lib/supabase';
 import { TITULO_SITIO, C, RichText, Keywords, resumen, fecha, lectura, btn, contenedor, estiloPagina, ESTILOS_BASE, Footer } from '@/components/notas-ui';
-import BotonTema from '@/components/BotonTema';
 import BotonCompartir from '@/components/BotonCompartir';
 
 export const dynamic = 'force-dynamic';
@@ -69,13 +68,11 @@ export default async function NotaPage({ params }) {
     <div style={estiloPagina}>
       <style>{ESTILOS_BASE}</style>
       <div style={contenedor}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', marginBottom: 'clamp(28px, 7vw, 36px)' }}>
+        {/* El tema y el candado están en la barra fija del layout. */}
+        <div style={{ marginBottom: 'clamp(28px, 7vw, 36px)' }}>
           <Link href="/" style={{ ...btn('ghost'), textDecoration: 'none' }}>
             <ArrowLeft size={13} /> Volver
           </Link>
-          <div style={{ marginRight: '-8px', flexShrink: 0 }}>
-            <BotonTema />
-          </div>
         </div>
         <div style={{ display: 'flex', gap: '14px', alignItems: 'baseline', marginBottom: '14px', flexWrap: 'wrap' }}>
           {numero != null && (
