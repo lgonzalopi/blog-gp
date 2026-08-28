@@ -33,8 +33,9 @@ export default function BotonCompartir({ titulo }) {
     }
   };
 
+  // Alineado a la derecha para que el campo de respaldo caiga bajo el botón.
   return (
-    <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
+    <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
       <button
         onClick={compartir}
         style={estado === 'copiado' ? { ...btn('ghost'), color: C.green, border: `1px solid ${C.green}` } : btn('ghost')}

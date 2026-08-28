@@ -85,6 +85,7 @@ export default function NotasOrquestador() {
   const [keywords, setKeywords] = useState('');
   const [fechaPub, setFechaPub] = useState('');
   const [editandoId, setEditandoId] = useState(null); // null = nota nueva
+  const [confirmandoBorrar, setConfirmandoBorrar] = useState(null); // id a confirmar
   const [previo, setPrevio] = useState(null);
   const [vistaPrevia, setVistaPrevia] = useState(false);
   const [notice, setNotice] = useState(null);
@@ -176,7 +177,12 @@ export default function NotasOrquestador() {
     if (el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
   }, [cuerpo, esAutor, vistaPrevia]);
 
-  useEffect(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); }, [pagina]);
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Una confirmación abierta no debe sobrevivir al cambio de página: la
+    // tarjeta que estaba confirmando ya no está a la vista.
+    setConfirmandoBorrar(null);
+  }, [pagina]);
 
   // El input date da 'YYYY-MM-DD'. Se le agrega la hora actual para que dos
   // notas del mismo día conserven el orden en que se publicaron.
@@ -317,6 +323,10 @@ export default function NotasOrquestador() {
   };
 
   const eliminar = async (id) => {
+    setConfirmandoBorrar(null);
+    // Si se estaba editando justo esa nota, el editor queda apuntando a algo
+    // que ya no existe: se limpia.
+    if (editandoId === id) limpiarEditor();
     if (hayStorage) {
       try {
         const res = await fetch(`/api/notes/${id}`, { method: 'DELETE' });
@@ -574,7 +584,38 @@ export default function NotasOrquestador() {
                         <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', color: C.muted, flex: 1, minWidth: 0, textAlign: 'right' }}>
                           {fecha(n.ts)} · {lectura(n.text)} min
                         </span>
-                        {esAutor && (
+                        {esAutor && (confirmandoBorrar === n.id ? (
+                          <span
+                            className="fade"
+                            style={{
+                              display: 'inline-flex', alignItems: 'center', gap: '8px', flexShrink: 0,
+                              margin: '-6px -6px -6px 0', padding: '4px 8px', borderRadius: '4px',
+                              background: alfa(C.error, 8), border: `1px solid ${alfa(C.error, 30)}`,
+                              fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px',
+                            }}
+                          >
+                            <span style={{ color: C.error }}>¿Borrar?</span>
+                            <button onClick={(ev) => { ev.preventDefault(); ev.stopPropagation(); eliminar(n.id); }}
+                              aria-label={`Sí, borrar: ${n.titulo}`}
+                              style={{
+                                background: 'none', border: 'none', cursor: 'pointer', padding: '4px 2px',
+                                fontFamily: 'inherit', fontSize: 'inherit', color: C.error, fontWeight: 600,
+                                textTransform: 'uppercase', letterSpacing: '.04em',
+                              }}>
+                              Sí
+                            </button>
+                            <span style={{ color: alfa(C.muted, 50) }}>·</span>
+                            <button onClick={(ev) => { ev.preventDefault(); ev.stopPropagation(); setConfirmandoBorrar(null); }}
+                              aria-label="Cancelar el borrado"
+                              style={{
+                                background: 'none', border: 'none', cursor: 'pointer', padding: '4px 2px',
+                                fontFamily: 'inherit', fontSize: 'inherit', color: C.muted,
+                                textTransform: 'uppercase', letterSpacing: '.04em',
+                              }}>
+                              No
+                            </button>
+                          </span>
+                        ) : (
                           <span style={{ display: 'inline-flex', gap: '2px', margin: '-8px -8px -8px 0', flexShrink: 0 }}>
                             <button onClick={(ev) => { ev.preventDefault(); ev.stopPropagation(); editarNota(n); }} aria-label={`Editar: ${n.titulo}`}
                               style={{
@@ -584,7 +625,7 @@ export default function NotasOrquestador() {
                               }}>
                               <Pencil size={13} />
                             </button>
-                            <button onClick={(ev) => { ev.preventDefault(); ev.stopPropagation(); eliminar(n.id); }} aria-label={`Eliminar: ${n.titulo}`}
+                            <button onClick={(ev) => { ev.preventDefault(); ev.stopPropagation(); setConfirmandoBorrar(n.id); }} aria-label={`Eliminar: ${n.titulo}`}
                               style={{
                                 background: 'none', border: 'none', cursor: 'pointer', color: C.muted, opacity: .5,
                                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
@@ -593,7 +634,7 @@ export default function NotasOrquestador() {
                               <X size={13} />
                             </button>
                           </span>
-                        )}
+                        ))}
                       </div>
                       <h2 className="card-title" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 'clamp(19px, 5vw, 22px)', lineHeight: 1.25, color: C.title, margin: '0 0 10px' }}>
                         {n.titulo}

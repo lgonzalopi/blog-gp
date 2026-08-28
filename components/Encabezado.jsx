@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { Menu, X, Lock, Unlock } from 'lucide-react';
+import { Menu, X, Lock, Unlock, Briefcase } from 'lucide-react';
 import { AUTOR, C, alfa, btn } from './notas-ui';
 import BotonTema from './BotonTema';
 import { useAutor } from './AutorContext';
@@ -64,6 +64,18 @@ export default function Encabezado() {
         backdropFilter: 'saturate(180%) blur(8px)',
       }}
     >
+      {/* Propios del encabezado: vive en el layout, fuera del CSS que cada
+          página inyecta, así que no puede depender de aquél. */}
+      <style>{`
+        @keyframes menuEntra {
+          from { opacity: 0; transform: translateY(-6px) scale(.98); }
+          to   { opacity: 1; transform: none; }
+        }
+        .menu-desplegable { animation: menuEntra .16s ease-out; transform-origin: top right; }
+        .menu-item { transition: background .15s, color .15s; }
+        .menu-item:hover, .menu-item:focus-visible { background: ${alfa(C.green, 12)}; color: ${C.title}; }
+        @media (prefers-reduced-motion: reduce) { .menu-desplegable { animation: none; } }
+      `}</style>
       <div
         style={{
           maxWidth: '680px', margin: '0 auto',
@@ -107,30 +119,53 @@ export default function Encabezado() {
             </button>
 
             {menuAbierto && (
-              <ul
-                className="fade"
+              <div
+                className="menu-desplegable"
+                role="menu"
                 style={{
-                  position: 'absolute', top: 'calc(100% + 6px)', right: 0,
-                  minWidth: '170px', listStyle: 'none', margin: 0, padding: '6px',
-                  background: C.raised, border: `1px solid ${C.line}`, borderRadius: '6px',
-                  boxShadow: `0 10px 30px ${alfa('#000', 35)}`,
+                  position: 'absolute', top: 'calc(100% + 8px)', right: 0,
+                  minWidth: '210px',
+                  background: C.raised, border: `1px solid ${C.line}`, borderRadius: '8px',
+                  boxShadow: `0 12px 32px ${alfa('#000', 40)}`,
+                  overflow: 'hidden',
                 }}
               >
-                <li>
-                  <button
-                    onClick={() => setMenuAbierto(false)}
-                    style={{
-                      width: '100%', textAlign: 'left', background: 'none', border: 'none',
-                      cursor: 'pointer', padding: '10px 12px', borderRadius: '4px',
-                      fontFamily: "'IBM Plex Mono', monospace", fontSize: '12px',
-                      letterSpacing: '.04em', textTransform: 'uppercase', color: C.body,
-                      minHeight: '40px',
-                    }}
-                  >
-                    Portafolio
-                  </button>
-                </li>
-              </ul>
+                <p style={{
+                  margin: 0, padding: '10px 14px 6px',
+                  fontFamily: "'IBM Plex Mono', monospace", fontSize: '10px',
+                  letterSpacing: '.14em', textTransform: 'uppercase', color: alfa(C.muted, 70),
+                }}>
+                  Navegación
+                </p>
+                <ul style={{ listStyle: 'none', margin: 0, padding: '0 6px 6px' }}>
+                  <li>
+                    <button
+                      className="menu-item"
+                      role="menuitem"
+                      onClick={() => setMenuAbierto(false)}
+                      style={{
+                        width: '100%', display: 'flex', alignItems: 'center', gap: '10px',
+                        textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer',
+                        padding: '10px 8px', borderRadius: '5px', minHeight: '42px',
+                        fontFamily: "'IBM Plex Mono', monospace", fontSize: '12px',
+                        letterSpacing: '.04em', textTransform: 'uppercase', color: C.body,
+                      }}
+                    >
+                      <Briefcase size={14} style={{ color: C.green, flexShrink: 0 }} />
+                      <span style={{ flex: 1 }}>Portafolio</span>
+                      {/* Todavía no lleva a ningún lado: mejor decirlo que
+                          dejar un clic que no hace nada. */}
+                      <span style={{
+                        fontSize: '9px', letterSpacing: '.1em', color: C.muted,
+                        border: `1px solid ${C.line}`, borderRadius: '999px',
+                        padding: '3px 7px', flexShrink: 0,
+                      }}>
+                        Pronto
+                      </span>
+                    </button>
+                  </li>
+                </ul>
+              </div>
             )}
           </div>
         </nav>

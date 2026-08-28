@@ -69,7 +69,7 @@ export default async function NotaPage({ params }) {
       <style>{ESTILOS_BASE}</style>
       <div style={contenedor}>
         {/* El tema y el candado están en la barra fija del layout. */}
-        <div style={{ marginBottom: 'clamp(28px, 7vw, 36px)' }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 'clamp(28px, 7vw, 36px)' }}>
           <Link href="/" style={{ ...btn('ghost'), textDecoration: 'none' }}>
             <ArrowLeft size={13} /> Volver
           </Link>
@@ -94,8 +94,8 @@ export default async function NotaPage({ params }) {
         )}
         <RichText texto={nota.text} size={17} />
         <div style={{ borderTop: `1px solid ${C.line}`, marginTop: '36px', paddingTop: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap' }}>
-          <BotonCompartir titulo={nota.titulo} />
           <Link href="/" style={{ ...btn('ghost'), textDecoration: 'none' }}><ArrowLeft size={13} /> Todas las notas</Link>
+          <BotonCompartir titulo={nota.titulo} />
         </div>
         <Footer />
       </div>
