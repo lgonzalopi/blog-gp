@@ -124,20 +124,13 @@ export default function Encabezado() {
                 role="menu"
                 style={{
                   position: 'absolute', top: 'calc(100% + 8px)', right: 0,
-                  minWidth: '210px',
+                  minWidth: '168px',
                   background: C.raised, border: `1px solid ${C.line}`, borderRadius: '8px',
                   boxShadow: `0 12px 32px ${alfa('#000', 40)}`,
                   overflow: 'hidden',
                 }}
               >
-                <p style={{
-                  margin: 0, padding: '10px 14px 6px',
-                  fontFamily: "'IBM Plex Mono', monospace", fontSize: '10px',
-                  letterSpacing: '.14em', textTransform: 'uppercase', color: alfa(C.muted, 70),
-                }}>
-                  Navegación
-                </p>
-                <ul style={{ listStyle: 'none', margin: 0, padding: '0 6px 6px' }}>
+                <ul style={{ listStyle: 'none', margin: 0, padding: '6px' }}>
                   <li>
                     <button
                       className="menu-item"
@@ -146,22 +139,13 @@ export default function Encabezado() {
                       style={{
                         width: '100%', display: 'flex', alignItems: 'center', gap: '10px',
                         textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer',
-                        padding: '10px 8px', borderRadius: '5px', minHeight: '42px',
+                        padding: '10px 10px', borderRadius: '5px', minHeight: '42px',
                         fontFamily: "'IBM Plex Mono', monospace", fontSize: '12px',
                         letterSpacing: '.04em', textTransform: 'uppercase', color: C.body,
                       }}
                     >
                       <Briefcase size={14} style={{ color: C.green, flexShrink: 0 }} />
-                      <span style={{ flex: 1 }}>Portafolio</span>
-                      {/* Todavía no lleva a ningún lado: mejor decirlo que
-                          dejar un clic que no hace nada. */}
-                      <span style={{
-                        fontSize: '9px', letterSpacing: '.1em', color: C.muted,
-                        border: `1px solid ${C.line}`, borderRadius: '999px',
-                        padding: '3px 7px', flexShrink: 0,
-                      }}>
-                        Pronto
-                      </span>
+                      <span>Portafolio</span>
                     </button>
                   </li>
                 </ul>
